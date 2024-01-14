@@ -5,11 +5,12 @@ async function migrateUsers(client) {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
     const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS speaks_users (
+      DROP TABLE IF EXISTS speaks_posts;
+      DROP TABLE IF EXISTS speaks_users;
+      CREATE TABLE speaks_users (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        login VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
       );
     `;
 
@@ -29,12 +30,13 @@ async function migratePosts(client) {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
     const createTable = await client.sql`
-    CREATE TABLE IF NOT EXISTS speaks_posts (
+    CREATE TABLE speaks_posts (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    date DATE NOT NULL
+    date DATE NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES speaks_users(id)
   );
 `;
 
@@ -53,8 +55,8 @@ async function migratePosts(client) {
 async function main() {
   const client = await db.connect();
 
-  await migratePosts(client);
   await migrateUsers(client);
+  await migratePosts(client);
 
   await client.end();
 }
