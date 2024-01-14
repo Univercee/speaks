@@ -10,7 +10,7 @@ export type PostRaw = Omit<PostTable, 'date'> & {
     date: Date
 }
 
-export type UserTable = {
+export type User = {
     id: string,
     login: string,
     password: string
