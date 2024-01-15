@@ -49,11 +49,8 @@ export async function createPost(formData: FormData){
     }
 }
 
-
 export async function authenticate(prevState: string|undefined, formData: FormData) {
     try {
-        console.log(formData);
-        
         await signIn('credentials', formData);
     } catch (error) {
         if (error instanceof AuthError) {

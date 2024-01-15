@@ -9,7 +9,7 @@ async function migrateUsers(client) {
       DROP TABLE IF EXISTS speaks_users;
       CREATE TABLE speaks_users (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        login VARCHAR(255) NOT NULL UNIQUE,
+        email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL
       );
     `;
@@ -36,7 +36,7 @@ async function migratePosts(client) {
     title VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     date DATE NOT NULL,
-    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES speaks_users(id)
+    CONSTRAINT fk_posts_users FOREIGN KEY(user_id) REFERENCES speaks_users(id)
   );
 `;
 

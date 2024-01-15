@@ -6,9 +6,9 @@ import { sql } from '@vercel/postgres';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcryptjs'
  
-async function getUser(login: string): Promise<User | undefined> {
+async function getUser(email: string): Promise<User | undefined> {
     try {
-      const user = await sql<User>`SELECT * FROM speaks_users WHERE login=${login}`;
+      const user = await sql<User>`SELECT * FROM speaks_users WHERE email=${email}`;
       return user.rows[0];
     } catch (error) {
       console.error('Failed to fetch user:', error);
@@ -16,18 +16,18 @@ async function getUser(login: string): Promise<User | undefined> {
     }
 }
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { handlers: {GET, POST}, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
         Credentials({
             async authorize(credentials){
                 const parsedCredentials = z
-                    .object({ login: z.string(), password: z.string().min(5) })
+                    .object({ email: z.string().email(), password: z.string().min(5) })
                     .safeParse(credentials);
                 if (parsedCredentials.success) {
-                    const { login, password } = parsedCredentials.data;
+                    const { email, password } = parsedCredentials.data;
                     
-                    const user = await getUser(login);
+                    const user = await getUser(email);
                     if (!user) return null;
                     
                     const passwordMatch = await bcrypt.compare(password, user.password);
