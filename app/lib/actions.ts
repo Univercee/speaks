@@ -3,17 +3,24 @@
 import { signIn } from "@/auth";
 import { sql } from "@vercel/postgres";
 import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from 'zod';
+import { auth } from "@/auth"
 
 const formSchema = z.object({
     id: z.string(),
     userId: z.string(),
-    title: z.string(),
-    description: z.string(),
+    title: z.string({
+        required_error: "The title field is required"
+    }),
+    description: z.string({
+        required_error: "The description field is required"
+    }),
     date: z.string()
 })
 
-const CreatePost = formSchema.omit({id: true, date: true});
+const CreatePost = formSchema.omit({id: true, date: true, userId: true});
 
 export type State = {
     errors?: {
@@ -23,9 +30,10 @@ export type State = {
     message?: string | null
 };
 
-export async function createPost(formData: FormData){
+export async function createPost(prevState: State, formData: FormData){
+    const session = await auth();
+    
     const validatedFields  = CreatePost.safeParse({
-        userId: formData.get('userId'),
         title: formData.get('title'),
         description: formData.get('description')
     });
@@ -37,15 +45,42 @@ export async function createPost(formData: FormData){
         };
     }
 
-    const { userId, title, description } = validatedFields.data;
-    const date = new Date().toISOString().split('T')[0]
+    const { title, description } = validatedFields.data;
+    const date = new Date().toISOString();
+    const userId = session?.user.id;
 
     try {
-        const posts = await sql`SELECT * FROM POSTS`;
-        return posts;
+        await sql`
+            INSERT INTO speaks_posts(user_id, title, description, date)
+            VALUES(${userId}, ${title}, ${description}, ${date})
+        `;
     } catch (error) {
-        console.error('Database Error:', error);
-        throw new Error('Failed to fetch Posts.');
+        console.log(error);
+        
+        return {
+            message: 'Database Error: Failed to Create Post.',
+        };
+    }
+    revalidatePath('/posts');
+    redirect('/posts')
+}
+
+export async function deletePost(id: string){
+    const session = await auth();
+    const userId = session?.user.id;
+
+    try {
+        await sql`
+            DELETE FROM speaks_posts WHERE id = ${id} AND user_id = ${userId}
+        `;
+        revalidatePath('/posts');
+        return {
+            message: 'Post deleted'
+        }
+    } catch (error) {
+        return {
+            message: `Database Error: Failed to delete Post<${id}>`,
+        };
     }
 }
 

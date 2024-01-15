@@ -1,13 +1,13 @@
 import type { NextAuthConfig } from 'next-auth';
-import { isObjectEmpty } from './app/lib/tools';
  
 export const authConfig = {
   pages: {
     signIn: '/login',
   },
+  session: { strategy: "jwt" },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !isObjectEmpty(auth?.user);
+      const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/posts');
       if (isOnDashboard) {
         if (isLoggedIn) return true;
@@ -17,6 +17,10 @@ export const authConfig = {
       }
       return true;
     },
+    session({session, token}){
+      session.user.id = token.sub;
+      return session;
+    }
   },
   providers: [], // Add providers with an empty array for now
 } satisfies NextAuthConfig;

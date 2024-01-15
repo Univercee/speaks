@@ -7,7 +7,8 @@ export default function Header(){
         <nav className="flex justify-center py-3">
             <SessionProvider>
                 <ul className="flex gap-3">
-                    <li><Link href="">Главная</Link></li>
+                    <li><Link href="/posts">Главная</Link></li>
+                    <li><Link href="/posts/create">Создать объявление</Link></li>
                     <li><Link href="">Мой кабинет</Link></li>
                     <li><p>en/ru</p></li>
                     <LiginBtn></LiginBtn>
