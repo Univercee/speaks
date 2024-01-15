@@ -3,8 +3,8 @@
 const users = [
   {
     id: '3958dc9e-712f-4377-85e9-fec4b6a6442a',
-    login: 'admin',
-    password: 'admin',
+    email: 'user@nextmail.com',
+    password: '123456',
   },
 ];
 

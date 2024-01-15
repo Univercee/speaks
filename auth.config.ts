@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { isObjectEmpty } from './app/lib/tools';
  
 export const authConfig = {
   pages: {
@@ -6,7 +7,7 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
+      const isLoggedIn = !isObjectEmpty(auth?.user);
       const isOnDashboard = nextUrl.pathname.startsWith('/posts');
       if (isOnDashboard) {
         if (isLoggedIn) return true;

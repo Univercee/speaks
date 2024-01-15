@@ -10,14 +10,14 @@ async function seedUsers(client) {
         users.map(async (user) => {
           const hashedPassword = await bcrypt.hash(user.password, 10);
           return client.sql`
-          INSERT INTO speaks_users (id, login, password)
-          VALUES (${user.id}, ${user.login}, ${hashedPassword})
+          INSERT INTO speaks_users (id, email, password)
+          VALUES (${user.id}, ${user.email}, ${hashedPassword})
           ON CONFLICT (id) DO NOTHING;
         `;
         }),
     );
 
-    console.log(`Seeded ${insertedUsers} users`);
+    console.log(`Seeded ${insertedUsers.length} users`);
 
     return {
         insertedUsers,
@@ -42,7 +42,7 @@ async function seedPosts(client) {
         }),
     );
 
-    console.log(`Seeded ${insertedPosts} posts`);
+    console.log(`Seeded ${insertedPosts.length} posts`);
 
     return {
         insertedPosts,
