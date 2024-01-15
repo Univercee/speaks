@@ -5,7 +5,7 @@ export default async function PostsTable(){
     return (
         <div className="flex flex-col gap-4">
             {posts.map(post => (
-                <div>
+                <div key={post.id}>
                     <h3>{post.title}</h3>
                     <p>{post.description}</p>
                     <p>{post.user}</p>
